@@ -69,10 +69,10 @@ async function  handleUnmatchedFiles(params){
 
 		try {
 
-			if (onBeforeUpload(bucket, root, unmatched[i])){
+			//if (onBeforeUpload(bucket, root, unmatched[i])){
 				await SYNC.initUploadFile(s3, bucket, root, unmatched[i]);
-				onUploadComplete(bucket, root, unmatched[i]);
-			}
+				//onUploadComplete(bucket, root, unmatched[i]);
+			//}
 
 		} catch (err) {
 			console.log(err);
