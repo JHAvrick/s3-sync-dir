@@ -77,9 +77,6 @@ function compareKeys(fileKey, objectKey, objectPrefix){
 	if (objectPrefix)
 		okey.shift();
 
-		console.log(fkey);
-		console.log(okey);
-
 	//If array length doesn't match, they aren't the same key
 	if (fkey.length !== okey.length) return false;
 

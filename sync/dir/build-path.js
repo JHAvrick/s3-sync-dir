@@ -4,8 +4,6 @@ const path = require('path');
 async function buildPath(root, filePath){
 	let parsedPath = filePath.split(path.sep);
 
-	console.log(parsedPath);
-
 	try {	
 
 		var pathString = '';

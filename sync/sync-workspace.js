@@ -148,12 +148,13 @@ async function handleUnmatchedObjects(params){
 
 				console.log("File was created or restored on another device: downloading file...");
 				let params = { Bucket: bucket, Key: objects[i].Key }
+				let filePath = keyToPath(objects[i].Key);
 				tags.updateDeviceHistory();
 
 				//Build the path if it doesn't exist, then download the file
 				//Upload a new set of tags so we know the object was synced here
-				await DIR.buildPath(root, objects[i].Key.replace(/\//g, PATH.sep));
-				await SYNC.download(s3, params, PATH.join(root, objects[i].Key));
+				await DIR.buildPath(root, filePath);
+				await SYNC.download(s3, params, PATH.join(root, filePath));
 				await SYNC.uploadTags(s3, bucket, objects[i].Key, tags);
 
 			} catch (err) {
@@ -311,12 +312,17 @@ async function handleMatchedUnsynced(params){
  * @return {string} S3 object key
  */
 function makeKey(prefix, root, filepath){
-
     let relativePath = PATH.relative(root, filepath).split(PATH.sep);
         relativePath.unshift(prefix); //Replace root of path with prefix
 
-
     return PATH.join(...relativePath).replace(/\\/g, "/");
+}
+
+function keyToPath(key){
+	let splitKey = key.split("/");
+		splitKey.shift();
+
+	return PATH.join(...splitKey);
 }
 
 module.exports = syncWorkspace;
