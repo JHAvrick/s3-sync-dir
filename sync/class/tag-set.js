@@ -162,6 +162,27 @@ class TagSet {
 	toQueryString(){
 		return this._queryStringEncode(this._toBase64(this._tags));
 	}
+
+	log(){
+		console.log("--------------------------------------------------");
+		console.log("KEY: " + this._key);
+		console.log("--------------------------------------------------");
+		
+		console.log("**** Synced Devices **** ")
+		for (let i = 0; i < this._tags['_JSON_deviceList'].length; i++){
+			console.log(this._tags['_JSON_deviceList'][i]);
+		}
+
+		console.log("\n");
+
+		console.log("**** MD5 History **** ")
+		for (let i = 0; i < this._tags['_JSON_md5History'].length; i++){
+			console.log(this._tags['_JSON_md5History'][i]);
+		}
+
+		console.log("\n");
+
+	}
 	
 }
 

@@ -19,6 +19,7 @@ async function syncDir(s3, bucket, root, callbacks = {}){
 	//Diff and sort
 	let sorted = await SYNC.sortMatches(root, files, objects);
 
+	
 	await handleUnmatchedFiles({
 		s3: s3, 
 		bucket: bucket,
@@ -27,6 +28,7 @@ async function syncDir(s3, bucket, root, callbacks = {}){
 		onBeforeUpload: callbacks.onBeforeUpload,
 		onUploadComplete: callbacks.onUploadComplete
 	});
+	
 
 	await handleUnmatchedObjects({
 		s3: s3, 
@@ -35,6 +37,7 @@ async function syncDir(s3, bucket, root, callbacks = {}){
 		objects: sorted.unmatchedObjects
 	});
 
+	
 	await handleMatchedDeleted({
 		s3: s3, 
 		bucket: bucket,
@@ -48,8 +51,9 @@ async function syncDir(s3, bucket, root, callbacks = {}){
 		root: root,
 		matchedUnsynced: sorted.matchedUnsynced
 	});
+	
 
-	console.log(sorted);
+	//console.log(sorted);
 }
 
 
@@ -90,11 +94,9 @@ async function handleUnmatchedObjects(params){
 	let objects = params.objects;
 
 	for (let i = 0; i < objects.length; i++){
-
+		
 		let tags = new TagSet(s3, bucket, objects[i].Key);
 		await tags.fetch();
-
-
 
 		/*
 		 * If the object has already been marked as deleted, make sure the tags note
@@ -105,7 +107,7 @@ async function handleUnmatchedObjects(params){
 				console.log("Updating sync status for object: " + objects[i].Key)
 				await SYNC.uploadTags(s3, bucket, objects[i].Key, tags);
 			}
-			break;
+			continue;
 		}
 
 		/*
@@ -144,6 +146,8 @@ async function handleUnmatchedObjects(params){
 				console.log(err);
 			}
 		}
+		
+
 	}
 
 	return true;
