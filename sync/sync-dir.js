@@ -15,11 +15,11 @@ async function syncDir(s3, bucket, root, callbacks = {}){
 	//Fetch objects and scan root directory
 	let objects = (await SYNC.listBucket(s3, bucket)).Contents;
 	let files = await DIR.listFilesDeep(PATH.join(root));
+	let tree = await DIR.listTreeDeep(PATH.join(root));
 
 	//Diff and sort
 	let sorted = await SYNC.sortMatches(root, files, objects);
 
-	
 	await handleUnmatchedFiles({
 		s3: s3, 
 		bucket: bucket,
@@ -28,7 +28,6 @@ async function syncDir(s3, bucket, root, callbacks = {}){
 		onBeforeUpload: callbacks.onBeforeUpload,
 		onUploadComplete: callbacks.onUploadComplete
 	});
-	
 
 	await handleUnmatchedObjects({
 		s3: s3, 
@@ -37,7 +36,6 @@ async function syncDir(s3, bucket, root, callbacks = {}){
 		objects: sorted.unmatchedObjects
 	});
 
-	
 	await handleMatchedDeleted({
 		s3: s3, 
 		bucket: bucket,
@@ -52,7 +50,6 @@ async function syncDir(s3, bucket, root, callbacks = {}){
 		matchedUnsynced: sorted.matchedUnsynced
 	});
 	
-
 	//console.log(sorted);
 }
 

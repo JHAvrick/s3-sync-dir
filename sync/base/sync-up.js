@@ -3,12 +3,11 @@ const TagSet = require('../class/tag-set.js');
 const md5File = require('md5-file/promise');
 const PATH = require('path');
 
-async function syncUp(s3, bucket, rootPath, filePath, tagSet) {
-	let objectKey = PATH.relative(rootPath, filePath).replace(/\\/g, "/");
+async function syncUp(s3, bucket, key, tagSet) {
 
 	let params = {
 		Bucket: bucket,
-		Key: objectKey,
+		Key: key,
 		Tagging: tagSet.toQueryString(), //async because of md5 fetch
 	}
 

@@ -4,24 +4,17 @@ AWS.config.loadFromPath('./config.json');
 // Create S3 service object
 s3 = new AWS.S3({apiVersion: '2006-03-01'});
 
-const syncDir = require('./sync/sync-dir');
+const syncWorkspace = require('./sync/sync-workspace');
 
-let root = process.argv[2];
-let bucket = process.argv[3];
+let bucket = process.argv[2];
+let prefix = process.argv[3];
+let root = process.argv[4];
 
 if (root && bucket){
 
   try {
 
-    syncDir(s3, bucket, root, {
-      onBeforeUpload: (bucket, root, file) => {
-        console.log("UPLOAD STARTING: " + path.basename(file));
-        return true;
-      },
-      onUploadComplete: (bucket, root, file) => {
-        console.log("COMPLETED: " + path.basename(file));
-      }
-    });
+    syncWorkspace(s3, bucket, prefix, root);
 
   } catch (err) {
     console.log(err);

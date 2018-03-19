@@ -12,7 +12,7 @@ const isLocalCurrent = require('./is-local-current');
  * @param {string} objects - Object list return from S3 listObjects()
  * @return {object} - object with three arrays representing the sorted files/objects
  */
-async function sortMatches(root, files, objects){
+async function sortMatches(root, files, objects, prefix = ''){
 
 	let unmatchedFiles = []; //Files with no matching object
 	let unmatchedObjects = []; //Object has no matching key - new or deleted
@@ -28,7 +28,7 @@ async function sortMatches(root, files, objects){
 		for (let o = 0; o < objects.length; o++){
 
 			//KEY COMPARISON
-			if (compareKeys(fileKey, objects[o].Key)){
+			if (compareKeys(fileKey, objects[o].Key, prefix)){
 				fileUnmatched = false; 
 
 				//-----------------------------------------MD5 COMPARISON -------------------------------------------------
@@ -67,9 +67,29 @@ async function sortMatches(root, files, objects){
 
 }
 
-function compareKeys(filePath, objectKey){
-	let fileKey = filePath.replace(/\\/g, "/");
-	return fileKey === objectKey;
+function compareKeys(fileKey, objectKey, objectPrefix){
+
+	//Split the filepath and object key
+	let fkey = fileKey.split(PATH.sep);
+	let okey = objectKey.split('/');
+
+	//Remove the bucket prefixes before comparing
+	if (objectPrefix)
+		okey.shift();
+
+		console.log(fkey);
+		console.log(okey);
+
+	//If array length doesn't match, they aren't the same key
+	if (fkey.length !== okey.length) return false;
+
+	//Check if array contents are the same
+	for (let i = 0; i < fkey.length; i++){
+		if (!okey.includes(fkey[i]))
+			return false;
+	}
+
+	return true;
 }
 
 module.exports = sortMatches;

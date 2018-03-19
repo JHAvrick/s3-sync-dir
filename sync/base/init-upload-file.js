@@ -17,14 +17,11 @@ const PATH = require('path');
  * @param {string} filePath - Absolute path to a file within the root folder
  * @return {Promise<object>} Promise with response from S3 service
  */
-async function initUploadFile(s3, bucket, rootPath, filePath){
-	let objectKey = PATH.relative(rootPath, filePath).replace(/\\/g, "/");
-
-	console.log(objectKey);
+async function initUploadFile(s3, bucket, key, filePath){
 
 	let params = {
 		Bucket: bucket,
-		Key: objectKey,
+		Key: key,
 		Tagging: await new TagSet().getInitTags(filePath), //async because of md5 fetch
 	}
 
