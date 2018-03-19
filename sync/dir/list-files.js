@@ -13,7 +13,7 @@ const readdir = require("./readdir");
 async function listFiles(dir){
 	try {
 		let fileList = [];
-		let files = await readdir(dir);
+		let files = (await readdir(dir)).filter(item => !(/(^|\/)\.[^\/\.]/g).test(item));
 
 		for (let i = 0; i < files.length; i++){
 			let filepath = path.join(dir, files[i]);
