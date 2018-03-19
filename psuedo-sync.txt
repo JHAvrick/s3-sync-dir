@@ -1,0 +1,53 @@
+/*
+-------------------------------------------------------------------------------------------
+			DIFF DIRETORY / BUCKET
+-------------------------------------------------------------------------------------------
+
+		GET LIST OF ALL FILES IN ROOT, GET COMPLETE BUCKET LISTING
+			[x] listFilesDeep()
+			[x] listBucket()
+	
+		FIND MISMATCHES
+			[X] findFilesystemMismatches()
+				[X] handleUnmatched()
+				[ ] handleFilesystemMismatch()
+			[X] findBucketMismatches()
+				[ ] handleBucketMismatch()
+
+-------------------------------------------------------------------------------------------
+			FILESYSTEM MISMATCH HANDLERS
+-------------------------------------------------------------------------------------------
+				
+				MD5 MISMATCH
+					[ ] getTagSet()
+						IS OBJECTED DELETED?
+
+							YES
+							isLocalCurrent()
+								[ ] YES - undeleteObject() (specialized version of upload()) ↑
+								[ ] NO - deleteFile() ↓
+
+							NO
+							isLocalCurrent()
+								[ ]	YES - updateObject() ↑
+								[ ]	NO - updateFile() ↓
+									[ ] - updateObjectTags() ↑
+
+
+				NO KEY MATCH
+				[X] initUpdloadFile() ↑
+
+
+-------------------------------------------------------------------------------------------
+			BUCKET MISMATCH HANDLERS
+-------------------------------------------------------------------------------------------
+			
+			OBJECT IS MARKED DELETED
+				IGNORE OBJECT
+
+			OBJECT IS NOT MARKED DELETED, BUT DOES NOT EXIST ON FILESYSTEM
+				[ ]FILESYSTEM syncObjectExistsState();
+					[ ] fileHasExisted() - has the file ever synced from this machine?
+						[ ] YES - deleteObject() ↑
+						[ ] NO - createFile() ↓
+*/
