@@ -15,12 +15,13 @@ const PATH = require('path');
  * @param {string} bucket - The bucket key 
  * @param {string} rootPath - Absolute path to the root sync folder
  * @param {string} filePath - Absolute path to a file within the root folder
- * @param {callback} onBefore - Return false to abort upload
- * @param {callback} onComplete - 
  * @return {Promise<object>} Promise with response from S3 service
  */
 async function initUploadFile(s3, bucket, rootPath, filePath){
 	let objectKey = PATH.relative(rootPath, filePath).replace(/\\/g, "/");
+
+	console.log(objectKey);
+
 	let params = {
 		Bucket: bucket,
 		Key: objectKey,

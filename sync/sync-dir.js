@@ -3,6 +3,7 @@ const SYNC = require('./base/sync-tools');
 const PATH = require('path');
 const md5File = require('md5-file/promise');
 const TagSet = require('./class/tag-set');
+const softDeleteConfig = require('./base/soft-delete-config');
 
 //Callbacks
 	//FIRST TIME UPLOADS
@@ -93,6 +94,20 @@ async function handleUnmatchedObjects(params){
 		let tags = new TagSet(s3, bucket, objects[i].Key);
 		await tags.fetch();
 
+
+
+		/*
+		 * If the object has already been marked as deleted, make sure the tags note
+		 * this device. No other action is needed.
+		 */
+		if (objects[i].ETag.replace(/(['"])/g, '') === softDeleteConfig.md5){
+			if (!tags.includesThisDevice()){
+				console.log("Updating sync status for object: " + objects[i].Key)
+				await SYNC.uploadTags(s3, bucket, objects[i].Key, tags);
+			}
+			break;
+		}
+
 		/*
 		 * If the tags include this device, we assume the file was present but has
 		 * since been deleted. That state is applied to the object via "soft delete".
@@ -121,7 +136,7 @@ async function handleUnmatchedObjects(params){
 
 				//Build the path if it doesn't exist, then download the file
 				//Upload a new set of tags so we know the object was synced here
-				await DIR.buildPath(root, objects[i].Key);
+				await DIR.buildPath(root, objects[i].Key.replace(/\//g, PATH.sep));
 				await SYNC.download(s3, params, PATH.join(root, objects[i].Key));
 				await SYNC.uploadTags(s3, bucket, objects[i].Key, tags);
 
@@ -175,6 +190,10 @@ async function handleMatchedDeleted(params){
 			 *			the file is possibly unrelated to the original file (same key, different file)
 			 */ 
 			if (localIsCurrent || tags.includesThisDevice() || !tags.includesMD5(fileMD5)) {
+
+				console.log("localIsCurrent: " + localIsCurrent);
+				console.log("tags include device: " + tags.includesThisDevice());
+				console.log("includes md5: " + tags.includesMD5(fileMD5));
 
 				console.log("Deleted file was restored or recreated: uploading file...");
 				await SYNC.initUploadFile(s3, bucket, root, filePath);
@@ -266,63 +285,5 @@ async function handleMatchedUnsynced(params){
 	}
 
 }
-
-
-async function handleSyncUp(params){
-	let s3 = params.s3;
-	let bucket = params.bucket;
-	let root = params.root;
-	let toSyncUp = params.toSyncUp;
-
-	for (let i = 0; i < toSyncUp.length; i++){
-		await SYNC.syncUp(s3, bucket, root, toSyncUp[i]);
-	}
-
-	return true;
-}
-
-async function handleSyncDown(params){
-	let s3 = params.s3;
-	let bucket = params.bucket;
-	let root = params.root;
-	let toSyncDown = params.toSyncDown;	
-
-
-}
-
-async function handleUndeleteObject(params) {
-	let s3 = params.s3;
-	let bucket = params.bucket;
-	let root = params.root;
-	let toUndelete = params.toUndelete;
-
-	for (let i = 0; i < toUndelete.length; i++){
-		await SYNC.initUploadFile(s3, bucket, root, toUndelete[i]);
-	}
-
-}
-
-
-//TO DO
- //CHECK IF THE CURRENT MACHINE IS THE ONE THAT DELETED THE FILE
-async function handleDeleteFiles(params){
-	let s3 = params.s3;
-	let bucket = params.bucket;
-	let root = params.root;
-	let toDelete = params.toDelete;
-
-	for (let i = 0; i < toDelete.length; i++){
-		try {
-			await DIR.deleteFile(toDelete[i]);
-		} catch (err){
-			console.log(err);
-		}
-	}
-
-	return true;
-}
-
-
-
 
 module.exports = syncDir;
