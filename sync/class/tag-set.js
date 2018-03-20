@@ -52,7 +52,7 @@ class TagSet {
 
 	//Creates a fresh set of tags for given file
 	async getInitTags(filePath){
-		let deviceName = OS.hostname().substring(0, 5);
+		let deviceName = OS.hostname().substring(5);
 		let syncDate = new Date().toString();
 		let md5 = await md5File(PATH.join(filePath));
 		
@@ -87,11 +87,11 @@ class TagSet {
 	}
 
 	resetDeviceList(){
-		this._tags['_JSON_deviceList'] = [OS.hostname().substring(0, 5)];
+		this._tags['_JSON_deviceList'] = [OS.hostname().substring(5)];
 	}
 
 	includesThisDevice(){
-		return this._tags['_JSON_deviceList'].includes(OS.hostname().substring(0, 5));
+		return this._tags['_JSON_deviceList'].includes(OS.hostname().substring(5));
 	}
 
 	async includesMD5of(filePath){
@@ -104,7 +104,7 @@ class TagSet {
 	}
 
 	updateDeviceHistory(){
-		let deviceName = OS.hostname().substring(0, 5);
+		let deviceName = OS.hostname().substring(5);
 
 		let deviceHistory = this._tags['_JSON_deviceList'];
 
