@@ -1,5 +1,4 @@
 const uploadFile = require('./upload-file');
-const getInitTags = require('./get-init-tags');
 const TagSet = require('../class/tag-set.js');
 const PATH = require('path');
 
@@ -17,12 +16,12 @@ const PATH = require('path');
  * @param {string} filePath - Absolute path to a file within the root folder
  * @return {Promise<object>} Promise with response from S3 service
  */
-async function initUploadFile(s3, bucket, key, filePath){
+async function initUploadFile(s3, bucket, key, rootId, filePath){
 
 	let params = {
 		Bucket: bucket,
 		Key: key,
-		Tagging: await new TagSet().getInitTags(filePath), //async because of md5 fetch
+		Tagging: await new TagSet(s3, bucket, key, rootId).getInitTags(filePath), //async because of md5 fetch
 	}
 
 	return uploadFile(s3, params, filePath);

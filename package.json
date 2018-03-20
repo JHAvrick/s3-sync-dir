@@ -10,6 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.205.0",
-    "md5-file": "^3.2.3"
+    "hidefile": "^2.0.0",
+    "md5-file": "^3.2.3",
+    "shortid": "^2.2.8"
   }
 }

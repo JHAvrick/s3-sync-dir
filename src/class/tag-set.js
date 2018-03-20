@@ -1,12 +1,12 @@
 const PATH = require('path');
-const OS = require('os');
 const md5File = require('md5-file/promise');
 
 class TagSet {
-	constructor(s3, bucket, key){
+	constructor(s3, bucket, key, rootId){
 		this._s3 = s3;
 		this._bucket = bucket;
 		this._key = key;
+		this._rootId = rootId;
 
 		//fetchTags() must be called to set these properties
 		this._tagsRaw = null;
@@ -52,12 +52,11 @@ class TagSet {
 
 	//Creates a fresh set of tags for given file
 	async getInitTags(filePath){
-		let deviceName = OS.hostname().substring(5);
 		let syncDate = new Date().toString();
 		let md5 = await md5File(PATH.join(filePath));
 		
 		let tags = {
-			_JSON_deviceList: [deviceName],
+			_JSON_deviceList: [this._rootId],
 			_JSON_md5History: [md5.substring(0, 10)]
 		}
 
@@ -87,11 +86,11 @@ class TagSet {
 	}
 
 	resetDeviceList(){
-		this._tags['_JSON_deviceList'] = [OS.hostname().substring(5)];
+		this._tags['_JSON_deviceList'] = [this._rootId];
 	}
 
 	includesThisDevice(){
-		return this._tags['_JSON_deviceList'].includes(OS.hostname().substring(5));
+		return this._tags['_JSON_deviceList'].includes(this._rootId);
 	}
 
 	async includesMD5of(filePath){
@@ -104,12 +103,10 @@ class TagSet {
 	}
 
 	updateDeviceHistory(){
-		let deviceName = OS.hostname().substring(5);
-
 		let deviceHistory = this._tags['_JSON_deviceList'];
 
-		if (!deviceHistory.includes(deviceName))
-			deviceHistory.unshift(deviceName)
+		if (!deviceHistory.includes(this._rootId))
+			deviceHistory.unshift(this._rootId)
 
 		this._tags['_JSON_deviceList'] = deviceHistory.slice(0, 20);
 	}
@@ -181,7 +178,6 @@ class TagSet {
 		}
 
 		console.log("\n");
-
 	}
 	
 }

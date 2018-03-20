@@ -4,7 +4,7 @@ const path = require('path');
 async function buildPath(root, filePath){
 	let parsedPath = filePath.split(path.sep);
 
-	try {	
+	try {
 
 		var pathString = '';
 		for (let i = 0; i < parsedPath.length - 1; i++){

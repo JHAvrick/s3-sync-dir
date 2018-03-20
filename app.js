@@ -4,7 +4,7 @@ AWS.config.loadFromPath('./config.json');
 // Create S3 service object
 s3 = new AWS.S3({apiVersion: '2006-03-01'});
 
-const syncWorkspace = require('./sync/sync-workspace');
+const syncWorkspace = require('./src/sync-workspace');
 
 let bucket = process.argv[2];
 let prefix = process.argv[3];
