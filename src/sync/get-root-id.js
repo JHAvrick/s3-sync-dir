@@ -1,6 +1,7 @@
 const FS = require('fs');
 const PATH = require('path');
 const shortid = require('shortid');
+const hidefile = require('hidefile');
 
 function getRootId(rootPath){
     return new Promise((resolve, reject) => {
@@ -13,7 +14,13 @@ function getRootId(rootPath){
                 const rootId = { id: shortid.generate() }
                 FS.writeFile(rootIdPath, JSON.stringify(rootId), (err) => {
                     if (err) reject(err);
-                    else resolve(rootId.id);
+                   
+                    hidefile.hide(rootIdPath, function(err, newpath) {
+                        if (err) reject(err);
+                        else resolve(rootId.id);
+                    }); 
+
+
                   });
 
             } else {
