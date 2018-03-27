@@ -10,7 +10,7 @@ const listDirs = require('./list-dirs');
  * @param {string} dir - The top-level directory to begin scan.
  * @return {Promise<array>} Flattened list of directory paths.
  */
-async function listTreeDeep(dir){
+async function listTreeDeep(dir, ignoreList = []){
 
 		async function flatten(dir, tree){
 			tree.push(dir);
@@ -28,7 +28,16 @@ async function listTreeDeep(dir){
 			await flatten(topLevel[i], tree);
 		}
 
-		return tree.concat(dir);
+		return tree.concat(dir).filter((dirs) => {
+			for (let i = 0; i < ignoreList.length; i++){
+				let regEx = ignoreList[i];
+				let dirname = path.basename(dirs);
+
+				if (regEx.test(dirname))
+					return false;
+			}
+			return true;
+		});
 }
 
 module.exports = listTreeDeep;

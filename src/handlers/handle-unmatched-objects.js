@@ -3,7 +3,7 @@ const DIR = require('../dir/dir-tools');
 const SYNC = require('../sync/sync-tools');
 const PATH = require('path');
 
-async function handleUnmatchedObjects(params, objects){
+async function handleUnmatchedObjects(params, objects, callbacks){
 	let s3 = params.s3;
     let bucket = params.bucket;
     let prefix = params.prefix;
@@ -12,8 +12,23 @@ async function handleUnmatchedObjects(params, objects){
 
 	for (let i = 0; i < objects.length; i++){
 		
+		//Callback params
+		let splitKey = objects[i].Key.split('/') //Split key to get last element as the name
+		let callbackParams = {
+			bucket: bucket,
+			root: root,
+			prefix: prefix,
+			key: objects[i].Key,
+			name: splitKey[splitKey.length - 1]
+		}
+
+		//Fetch tags for the unmatched object
 		let tags = new TagSet(s3, bucket, objects[i].Key, rootId);
-		await tags.fetch();
+		try {
+			await tags.fetch();
+		} catch (err) {
+			console.log(err); continue;
+		}
 
 		/*
 		 * If the object has already been marked as deleted, make sure the tags note
@@ -21,7 +36,6 @@ async function handleUnmatchedObjects(params, objects){
 		 */
 		if (objects[i].ETag.replace(/(['"])/g, '') === SYNC.softDeleteConfig.md5){
 			if (!tags.includesThisDevice()){
-				console.log("Updating sync status for object: " + objects[i].Key)
 				await SYNC.uploadTags(s3, bucket, objects[i].Key, tags);
 			}
 			continue;
@@ -33,10 +47,15 @@ async function handleUnmatchedObjects(params, objects){
 		 */ 
 		if (tags.includesThisDevice()){
 			try { 
-				console.log("File was deleted: updating object...");
-				await SYNC.softDeleteObject(s3, bucket, objects[i].Key, tags);
+				
+				callbackParams.type =  SYNC.SyncTypes.DELETE_OBJECT;
+				if (callbacks.onBefore(callbackParams)){
+					await SYNC.softDeleteObject(s3, bucket, objects[i].Key, tags);
+					callbacks.onComplete(callbackParams);
+				}
+				
 			} catch (err){
-				console.log(err); 
+				callbacks.onError(err, callbackParams);
 			}
 
 		/*
@@ -49,19 +68,24 @@ async function handleUnmatchedObjects(params, objects){
 		} else {
 			try {
 
-				console.log("File was created or restored on another device: downloading file...");
+				
 				let params = { Bucket: bucket, Key: objects[i].Key }
 				let filePath = SYNC.keyToPath(objects[i].Key);
 				tags.updateDeviceHistory();
 
-				//Build the path if it doesn't exist, then download the file
-				//Upload a new set of tags so we know the object was synced here
-				await DIR.buildPath(root, filePath);
-				await SYNC.download(s3, params, PATH.join(root, filePath));
-				await SYNC.uploadTags(s3, bucket, objects[i].Key, tags);
+				callbackParams.type =  SYNC.SyncTypes.DOWNLOAD;
+				if (callbacks.onBefore(callbackParams)){
+					//Build the path if it doesn't exist, then download the file
+					//Upload a new set of tags so we know the object was synced here
+					await DIR.buildPath(root, filePath);
+					await SYNC.download(s3, params, PATH.join(root, filePath));
+					await SYNC.uploadTags(s3, bucket, objects[i].Key, tags);
+
+					callbacks.onComplete(callbackParams);
+				}
 
 			} catch (err) {
-				console.log(err);
+				callbacks.onError(err, callbackParams);
 			}
 		}
 		

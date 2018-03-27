@@ -1,4 +1,5 @@
 const SYNC = {
+	SyncTypes: require('./sync-types'),
 	makeKey: require('./make-key'),
 	keyToPath: require('./key-to-path'),
 	getRootId: require('./get-root-id'),

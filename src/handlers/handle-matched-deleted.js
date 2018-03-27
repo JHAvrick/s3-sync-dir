@@ -14,7 +14,7 @@ const PATH = require('path');
  * file to be removed or created when it should not have been. As such, this method
  * leans toward NOT deleting a file unless it's sure that is the appropriate action.
  */ 
-async function handleMatchedDeleted(params, matchedDeleted){
+async function handleMatchedDeleted(params, matchedDeleted, callbacks){
 	let s3 = params.s3;
     let bucket = params.bucket;
     let prefix = params.prefix;
@@ -22,6 +22,15 @@ async function handleMatchedDeleted(params, matchedDeleted){
 	let rootId = params.rootId;
 
 	for (let i = 0; i < matchedDeleted.length; i++){
+
+		//Callback params
+		let callbackParams = {
+			bucket: bucket,
+			root: root,
+			prefix: prefix,
+			key: matchedDeleted[i].object.Key,
+			name: PATH.basename(matchedDeleted[i].file)
+		}
 
 		try {
 
@@ -47,28 +56,31 @@ async function handleMatchedDeleted(params, matchedDeleted){
 			 */ 
 			if (localIsCurrent || tags.includesThisDevice() || !tags.includesMD5(fileMD5)) {
 
-				console.log("Deleted file was restored or recreated: uploading file...");
-                await SYNC.initUploadFile(s3, bucket, key, rootId, filePath);
+				callbackParams.type =  SYNC.SyncTypes.UPLOAD;
+				if (callbacks.onBefore(callbackParams)){
+					await SYNC.initUploadFile(s3, bucket, key, rootId, filePath);
+					callbacks.onComplete(callbackParams);
+				}
                 
 			//If none of these conditions are matched, it is assumed safe to delete the local file
 			} else {
-
-				console.log("File was deleted on another device: deleting file...");
 
 				//Update tags so we know this file's deletion state has been synced
 				//to this device next time (thereby possibly meeting condition 2 above)
 				tags.addToMD5History(fileMD5);
 				tags.updateDeviceHistory();
 
-				await SYNC.uploadTags(s3, bucket, key, tags);
-				await DIR.deleteFile(filePath);
+				callbackParams.type =  SYNC.SyncTypes.DELETE_FILE;
+				if (callbacks.onBefore(callbackParams)){
+					await SYNC.uploadTags(s3, bucket, key, tags);
+					await DIR.deleteFile(filePath);
+					callbacks.onComplete(callbackParams);
+				}
 
 			}
 
 		} catch (err) {
-
-			console.log(err);
-
+			callbacks.onError(err, callbackParams);
 		}
 
 	}

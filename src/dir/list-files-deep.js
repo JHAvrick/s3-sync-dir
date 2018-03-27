@@ -9,18 +9,30 @@ const listFiles = require('./list-files');
  *
  * @async
  * @param {string} dir - The top-level directory to begin scan.
+ * @param {array} ignoreList - An array of RegExP objects. Matching files or
+ * 								directories will be ignored.
  * @return {Promise<array>} Flattened list of directory paths.
  */
-async function listFilesDeep(dir){
+async function listFilesDeep(dir, ignoreList = []){
 
-		var tree = await listTreeDeep(dir); //Get full dir tree
+		var tree = await listTreeDeep(dir, ignoreList); //Get full dir tree
 		var files = [];
 
 		for (var i = 0; i < tree.length; i++){
 			files = files.concat(await listFiles(tree[i]));
 		}
-		
-		return files;
+	
+		return files.filter((filePath) => {
+			for (let i = 0; i < ignoreList.length; i++){
+				let regEx = ignoreList[i];
+				let filename = path.basename(filePath);
+
+				if (regEx.test(filename))
+					return false;
+
+			}
+			return true;
+		});
 }
 
 module.exports = listFilesDeep;

@@ -10,11 +10,44 @@ let bucket = process.argv[2];
 let prefix = process.argv[3];
 let root = process.argv[4];
 
+console.log(root);
+
 if (root && bucket){
 
   try {
+    
+    let config = {
+      s3: s3,
+      bucket: bucket,
+      prefix: prefix,
+      root: root,
+      ignore: [],
+    }
 
-    syncWorkspace(s3, bucket, prefix, root);
+    let callbacks =  {
+      onBefore: (params) => {
+        console.log("------------------------------------------");
+        console.log("Operation: " + params.type);
+        console.log("Item: " + params.name);
+        return true;
+      },
+      onError: (err, params) => {
+        console.log("FAILED: " + params.name)
+        console.log("------------------------------------------");
+      },
+      onComplete: (params) => {
+        console.log("COMPLETED: " + params.name)
+        console.log("------------------------------------------");
+      },
+      onSyncError: (err, params) => {
+        console.log(err);
+      },
+      onSyncComplete: (params) => {
+        console.log("============SYNC COMPLETE=============")
+      }
+    }
+
+    syncWorkspace(config, callbacks);
 
   } catch (err) {
     console.log(err);
