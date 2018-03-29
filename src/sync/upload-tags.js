@@ -1,11 +1,11 @@
-function uploadTags(s3, bucket, key, tagSet){
+function uploadTags(s3, bucket, key, tags){
 	return new Promise((resolve, reject) => {
 
 		var params = {
 			Bucket: bucket, 
 			Key: key, 
 			Tagging: {
-				TagSet: tagSet.toArray()
+				TagSet: tags
 			}
 		};
 

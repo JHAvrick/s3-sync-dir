@@ -68,7 +68,7 @@ async function handleMatchedUnsynced(params, unsynced, callbacks){
 
 				}
 
-			} 
+			}
 
 		} catch (err) {
 			callbacks.onError(err, callbackParams);

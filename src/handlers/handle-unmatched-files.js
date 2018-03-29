@@ -24,8 +24,6 @@ async function  handleUnmatchedFiles(params, unmatched, callbacks){
 			type: SYNC.SyncTypes.UPLOAD
 		}
 
-		console.log(key);
-
 		try {
 
 			if (callbacks.onBefore(callbackParams)){

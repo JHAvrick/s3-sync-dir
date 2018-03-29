@@ -4,13 +4,11 @@ AWS.config.loadFromPath('./config.json');
 // Create S3 service object
 s3 = new AWS.S3({apiVersion: '2006-03-01'});
 
-const syncWorkspace = require('./src/sync-workspace');
+const syncDir = require('./src/sync-dir');
 
 let bucket = process.argv[2];
 let prefix = process.argv[3];
 let root = process.argv[4];
-
-console.log(root);
 
 if (root && bucket){
 
@@ -47,7 +45,7 @@ if (root && bucket){
       }
     }
 
-    syncWorkspace(config, callbacks);
+    syncDir(config, callbacks);
 
   } catch (err) {
     console.log(err);
