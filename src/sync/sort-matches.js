@@ -13,7 +13,7 @@ const SyncObjects = require('../class/sync-objects');
  * @param {string} objects - Object list return from S3 listObjects()
  * @return {object} - object with three arrays representing the sorted files/objects
  */
-async function sortMatches(params, files, objects){
+async function sortMatches(params, tree, files, objects){
 
 	let root = params.root;
 	let prefix = params.prefix;
@@ -67,6 +67,9 @@ async function sortMatches(params, files, objects){
 		}
 
 	}
+
+	
+
 
 	//For any remaining objects, create UnmatchedObject
 	objects.forEach((unmatched) => {

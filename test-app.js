@@ -10,7 +10,6 @@ let bucket = process.argv[2];
 let prefix = process.argv[3];
 let root = process.argv[4];
 
-
 try {
 
     let config = {

@@ -19,20 +19,10 @@ async function listFilesDeep(dir, ignoreList = []){
 		var files = [];
 
 		for (var i = 0; i < tree.length; i++){
-			files = files.concat(await listFiles(tree[i]));
+			files = files.concat(await listFiles(tree[i], ignoreList));
 		}
 	
-		return files.filter((filePath) => {
-			for (let i = 0; i < ignoreList.length; i++){
-				let regEx = ignoreList[i];
-				let filename = path.basename(filePath);
-
-				if (regEx.test(filename))
-					return false;
-
-			}
-			return true;
-		});
+		return files;
 }
 
 module.exports = listFilesDeep;

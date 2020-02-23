@@ -40,7 +40,8 @@ class DirectorySync {
     async _prepareSync(){
 		//Fetch objects and scan root directory
         let rootId = await SYNC.getRootId(this._root);
-        let files = await DIR.listFilesDeep(PATH.join(this._root), this._ignore);
+        //let files = await DIR.listFilesDeep(PATH.join(this._root), this._ignore);
+        let dir = await DIR.listAllDeep(PATH.join(this._root), this._ignore);
         let objects = (await SYNC.listBucket(this._s3, this._bucket, this._prefix)).Contents;
         
         let params = {
@@ -51,7 +52,7 @@ class DirectorySync {
             rootId: rootId
         }
 
-        this.unsynced = await SYNC.sortMatches(params, files, objects);
+        this.unsynced = await SYNC.sortMatches(params, dir.tree, dir.files, objects);
     }
 
     /*
@@ -132,7 +133,6 @@ class DirectorySync {
     stopSync(){ this._isStopped = true; }
 
 }
-
 
 //unmatched deleted dir object (ignore)
 //unmatched local dir (upload)

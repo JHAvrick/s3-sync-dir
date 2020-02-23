@@ -1,0 +1,25 @@
+SORT 1
+
+    unmatched files 
+        = InitUpload
+
+    matched unsynced
+        = Upload
+        = Download
+
+    unmatched objects
+        = Update
+        = DeleteObject
+
+    matched deleted
+        = DeleteLocal
+        = InitUpload
+
+
+LAYER 1: Read Dir / Fetch Bucket
+LAYER 2: Sorting / Diff
+LAYER 3: Object / Sync
+LAYER 4: Request Layer / REST - Replaceable for custom auth
+
+Create new SyncLog
+

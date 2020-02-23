@@ -44,7 +44,7 @@ class MatchedDeleted extends SyncObject {
  
              //If none of these conditions are matched, it is assumed safe to delete the local file
              } else {
-                syncType =  SyncObject.Types.UPDATE_TAGS;
+                syncType =  SyncObject.Types.DELETE_FILE;
  
                 //Update tags so we know this file's deletion state has been synced
                 //to this device next time (thereby possibly meeting condition 2 above)
